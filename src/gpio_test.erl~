@@ -1,0 +1,27 @@
+-module(gpio_test).
+
+-export([start/0,on/2,off/2,stop/1]).
+
+start()->
+    {ok,Ref}=python:start().
+
+stop(Ref)->
+    python:stop(Ref).
+
+on(Ref,Pin)->
+   spawn(fun()-> gpio_handl(on,Ref,Pin) end).
+		 
+off(Ref,Pin)->
+    spawn(fun()->gpio_handl(off,Ref,Pin) end).
+
+gpio_handl(State,Ref,Pin)->
+    case State of
+	on->
+	    python:call(Ref,on,led_on,[Pin]);
+	off->
+	    python:call(Ref,off,led_off,[Pin])
+    end,	    
+    receive
+	infinity->
+	    ok
+    end.
